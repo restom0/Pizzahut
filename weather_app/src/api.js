@@ -1,8 +1,8 @@
 // Frontend client for our own serverless API (which proxies OpenWeather).
 // The browser never sees the OpenWeather API key.
-import { DEMO_HOME_LOCATION, DEMO_LOCATIONS, DEMO_WEATHER } from "./demoData";
+import { DEMO_LOCATIONS, DEMO_WEATHER } from "./demoData";
 
-export { DEMO_HOME_LOCATION };
+export { DEMO_HOME_LOCATION } from "./demoData";
 
 const DEMO_FLAG_VALUES = new Set(["1", "true", "yes", "on"]);
 const COORD_TOLERANCE = 0.01;
@@ -13,7 +13,7 @@ export function isDemoMode() {
 }
 
 function clone(data) {
-  return JSON.parse(JSON.stringify(data));
+  return structuredClone(data);
 }
 
 function celsiusToFahrenheit(value) {

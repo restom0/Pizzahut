@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import SearchBar from "./components/SearchBar";
 import WeatherView from "./components/WeatherView";
-import { getWeatherByCoords } from "./api";
+import { DEMO_HOME_LOCATION, getWeatherByCoords, isDemoMode } from "./api";
 import { themeFor } from "./lib/format";
 import { useI18n } from "./i18n";
 
 export default function App() {
   const { t, language, languages, setLanguage } = useI18n();
+  const demoMode = isDemoMode();
   const [units, setUnits] = useState(() => localStorage.getItem("units") || "metric");
   const [weather, setWeather] = useState(null);
   // status: locating | loading | ready | error | idle
@@ -41,6 +42,11 @@ export default function App() {
   );
 
   const requestMyLocation = useCallback(() => {
+    if (demoMode) {
+      loadByCoords(DEMO_HOME_LOCATION.lat, DEMO_HOME_LOCATION.lon, units, language);
+      return;
+    }
+
     if (!("geolocation" in navigator)) {
       setStatus("idle");
       setError({ key: "geolocationUnsupported" });
@@ -61,9 +67,9 @@ export default function App() {
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 10 * 60 * 1000 }
     );
-  }, [loadByCoords, units, language]);
+  }, [demoMode, loadByCoords, units, language]);
 
-  // Try to show the current location's weather on first load.
+  // Demo mode uses a stable sample location; live mode tries browser location.
   useEffect(() => {
     requestMyLocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -97,9 +103,16 @@ export default function App() {
     <div className={`min-h-screen w-full bg-gradient-to-br ${theme} transition-colors duration-700`}>
       <div className="mx-auto flex min-h-screen max-w-xl flex-col gap-5 px-4 py-8 sm:py-12">
         <header className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-semibold tracking-tight text-white">
-            ⛅ {t("appTitle")}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold tracking-tight text-white">
+              ⛅ {t("appTitle")}
+            </h1>
+            {demoMode && (
+              <span className="rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium uppercase text-white/90 ring-1 ring-white/25">
+                {t("demoMode")}
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <LanguageSelect
               language={language}
@@ -142,15 +155,21 @@ export default function App() {
         </main>
 
         <footer className="text-center text-xs text-white/60">
-          {t("dataBy")}{" "}
-          <a
-            className="underline hover:text-white/80"
-            href="https://openweathermap.org/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            OpenWeather
-          </a>
+          {demoMode ? (
+            t("demoData")
+          ) : (
+            <>
+              {t("dataBy")}{" "}
+              <a
+                className="underline hover:text-white/80"
+                href="https://openweathermap.org/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                OpenWeather
+              </a>
+            </>
+          )}
         </footer>
       </div>
     </div>

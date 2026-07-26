@@ -42,6 +42,8 @@ export const TRANSLATIONS = {
     high: "H",
     low: "L",
     dataBy: "Data by",
+    demoMode: "Demo",
+    demoData: "Demo data",
   },
   es: {
     appTitle: "El tiempo",
@@ -70,6 +72,8 @@ export const TRANSLATIONS = {
     high: "Máx",
     low: "Mín",
     dataBy: "Datos de",
+    demoMode: "Demo",
+    demoData: "Datos de demo",
   },
   vi: {
     appTitle: "Thời tiết",
@@ -98,6 +102,8 @@ export const TRANSLATIONS = {
     high: "Cao",
     low: "Thấp",
     dataBy: "Dữ liệu từ",
+    demoMode: "Demo",
+    demoData: "Du lieu demo",
   },
   fr: {
     appTitle: "Météo",
@@ -127,6 +133,8 @@ export const TRANSLATIONS = {
     high: "Max",
     low: "Min",
     dataBy: "Données de",
+    demoMode: "Demo",
+    demoData: "Donnees de demo",
   },
   de: {
     appTitle: "Wetter",
@@ -156,6 +164,8 @@ export const TRANSLATIONS = {
     high: "Max",
     low: "Min",
     dataBy: "Daten von",
+    demoMode: "Demo",
+    demoData: "Demo-Daten",
   },
   ca: {
     appTitle: "El temps",
@@ -184,6 +194,8 @@ export const TRANSLATIONS = {
     high: "Màx",
     low: "Mín",
     dataBy: "Dades de",
+    demoMode: "Demo",
+    demoData: "Dades de demo",
   },
   it: {
     appTitle: "Meteo",
@@ -212,5 +224,7 @@ export const TRANSLATIONS = {
     high: "Max",
     low: "Min",
     dataBy: "Dati di",
+    demoMode: "Demo",
+    demoData: "Dati demo",
   },
 };

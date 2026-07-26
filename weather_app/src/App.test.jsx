@@ -3,13 +3,15 @@ import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { renderWithI18n } from "./test/utils";
 
 vi.mock("./api", () => ({
+  DEMO_HOME_LOCATION: { name: "Bangkok", country: "TH", lat: 13.7563, lon: 100.5018 },
   getWeatherByCoords: vi.fn(),
   getWeatherByQuery: vi.fn(),
+  isDemoMode: vi.fn(() => false),
   searchLocations: vi.fn(),
 }));
 
 import App from "./App";
-import { getWeatherByCoords, searchLocations } from "./api";
+import { getWeatherByCoords, isDemoMode, searchLocations } from "./api";
 
 const WEATHER = {
   name: "Testville",
@@ -38,6 +40,7 @@ const deny = (_success, error) => error({ code: 1, PERMISSION_DENIED: 1 });
 
 beforeEach(() => {
   vi.clearAllMocks();
+  isDemoMode.mockReturnValue(false);
   localStorage.clear();
   delete navigator.geolocation;
 });
@@ -67,6 +70,23 @@ describe("App", () => {
     // navigator.geolocation is deleted in beforeEach.
     renderWithI18n(<App />);
     expect(await screen.findByText(/isn't supported by your browser/)).toBeInTheDocument();
+  });
+
+  it("uses the demo home location without browser geolocation in demo mode", async () => {
+    isDemoMode.mockReturnValue(true);
+    getWeatherByCoords.mockResolvedValue({
+      ...WEATHER,
+      name: "Bangkok",
+      sys: { ...WEATHER.sys, country: "TH" },
+    });
+    renderWithI18n(<App />);
+
+    expect(await screen.findByRole("heading", { name: "Bangkok, TH" })).toBeInTheDocument();
+    expect(screen.getByText("Demo data")).toBeInTheDocument();
+    expect(getWeatherByCoords).toHaveBeenCalledWith(13.7563, 100.5018, {
+      units: "metric",
+      lang: "en",
+    });
   });
 
   it("loads current-location weather when geolocation succeeds", async () => {

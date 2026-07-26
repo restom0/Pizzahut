@@ -14,6 +14,20 @@ npm install
 npm run dev               # http://localhost:5173
 ```
 
+Demo mode uses bundled dummy OpenWeather-shaped snapshots, skips geolocation,
+and still demonstrates search -> select city -> weather details -> unit/language
+changes.
+
+```bash
+VITE_DEMO_MODE=true npm run dev
+```
+
+PowerShell:
+
+```powershell
+$env:VITE_DEMO_MODE="true"; npm run dev
+```
+
 ## Scripts
 
 | Command            | Description                                            |
@@ -39,6 +53,7 @@ src/
   App.jsx             app shell, state, geolocation
   components/         SearchBar, WeatherView
   lib/format.js       display + theming helpers
+  demoData.js         dummy OpenWeather-shaped snapshots for demo mode
   api.js              client for our own /api endpoints
   test/setup.js       Vitest setup (jest-dom matchers)
 *.test.js(x)          co-located unit tests (Vitest + Testing Library)
@@ -66,5 +81,6 @@ setup (org/project keys, `SONAR_TOKEN` secret, disabling Automatic Analysis).
 | `OPENWEATHER_API_KEY`  |   yes    | —        |
 | `RATE_LIMIT_MAX`       |    no    | `100`    |
 | `RATE_LIMIT_WINDOW_MS` |    no    | `900000` |
+| `VITE_DEMO_MODE`       |    no    | `false`  |
 
 Deployment instructions are in the [repository README](../README.md#deploy-to-vercel).

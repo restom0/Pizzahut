@@ -1,8 +1,15 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { getWeatherByCoords, getWeatherByQuery, searchLocations } from "./api";
+import {
+  DEMO_HOME_LOCATION,
+  getWeatherByCoords,
+  getWeatherByQuery,
+  isDemoMode,
+  searchLocations,
+} from "./api";
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
 
 function okJson(data) {
@@ -10,6 +17,14 @@ function okJson(data) {
 }
 
 describe("api client", () => {
+  it("detects demo mode from the Vite env flag", () => {
+    vi.stubEnv("VITE_DEMO_MODE", "yes");
+    expect(isDemoMode()).toBe(true);
+
+    vi.stubEnv("VITE_DEMO_MODE", "false");
+    expect(isDemoMode()).toBe(false);
+  });
+
   it("getWeatherByCoords calls /api/weather with lat/lon/units", async () => {
     const fetchMock = vi.fn().mockResolvedValue(okJson({ name: "London" }));
     vi.stubGlobal("fetch", fetchMock);
@@ -132,5 +147,59 @@ describe("api client", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(searchLocations("x")).rejects.toThrow(/Request failed \(500\)/);
+  });
+
+  it("serves demo weather by coordinates without calling fetch", async () => {
+    vi.stubEnv("VITE_DEMO_MODE", "true");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const data = await getWeatherByCoords(DEMO_HOME_LOCATION.lat, DEMO_HOME_LOCATION.lon, {
+      units: "metric",
+    });
+
+    expect(data.name).toBe("Bangkok");
+    expect(data.main.temp).toBe(32.4);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("converts demo weather to imperial units", async () => {
+    vi.stubEnv("VITE_DEMO_MODE", "true");
+
+    const data = await getWeatherByCoords(DEMO_HOME_LOCATION.lat, DEMO_HOME_LOCATION.lon, {
+      units: "imperial",
+    });
+
+    expect(data.main.temp).toBeCloseTo(90.32, 2);
+    expect(data.main.temp_min).toBeCloseTo(87.44, 2);
+    expect(data.main.temp_max).toBeCloseTo(93.56, 2);
+    expect(data.main.feels_like).toBeCloseTo(96.98, 2);
+    expect(data.wind.speed).toBeCloseTo(7.16, 2);
+  });
+
+  it("serves demo weather by city query", async () => {
+    vi.stubEnv("VITE_DEMO_MODE", "on");
+
+    const data = await getWeatherByQuery("Tokyo");
+
+    expect(data.name).toBe("Tokyo");
+    expect(data.weather[0].description).toBe("clear sky");
+  });
+
+  it("serves limited demo search results", async () => {
+    vi.stubEnv("VITE_DEMO_MODE", "1");
+
+    const results = await searchLocations("yo", 2);
+
+    expect(results).toHaveLength(2);
+    expect(results.map((place) => place.name)).toEqual(["Tokyo", "New York"]);
+  });
+
+  it("throws when demo weather has no matching sample", async () => {
+    vi.stubEnv("VITE_DEMO_MODE", "true");
+
+    await expect(getWeatherByCoords(0, 0)).rejects.toThrow(
+      "Demo weather is not available for this location."
+    );
   });
 });
